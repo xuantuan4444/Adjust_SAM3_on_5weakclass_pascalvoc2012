@@ -1,15 +1,18 @@
 # SAM3 VOC2012 Streamlit App
 
-Demo Streamlit cho bài toán inference ảnh với SAM3 kết hợp các checkpoint UNet/ASPP và LoRA fine-tuned. Ứng dụng chạy trong Docker, còn thư mục `weights/` được mount từ máy host vì checkpoint rất nặng và không nên push lên GitHub.
+A Streamlit demo application for image inference using **SAM3** combined with multiple UNet/ASPP checkpoints and LoRA fine-tuned models.
 
-## 1. Cấu Trúc Dự Án
+The application is designed to run inside Docker, while the `weights/` directory is mounted from the host machine because the checkpoints are extremely large and should not be pushed to GitHub.
+
+---
+
+# 1. Project Structure
 
 ```text
 .
 ├── Dockerfile
 ├── README.md
 ├── .dockerignore
-├── .gitignore
 ├── streamlit_app/
 │   ├── README.md
 │   ├── *.ipynb
@@ -30,27 +33,35 @@ Demo Streamlit cho bài toán inference ảnh với SAM3 kết hợp các checkp
         └── adapter_model.safetensors
 ```
 
-Ý nghĩa các file/folder chính:
+---
 
-- `Dockerfile`: định nghĩa môi trường chạy app bằng Docker. Image copy code trong `streamlit_app/streamlit_app/`, cài Python dependencies, cài SAM3 từ GitHub và chạy Streamlit ở port `8501`.
-- `.dockerignore`: loại bỏ checkpoint, cache, notebook và file nặng khỏi Docker build context.
-- `.gitignore`: loại bỏ `weights/`, checkpoint và cache khỏi Git.
-- `streamlit_app/streamlit_app/app.py`: giao diện Streamlit.
-- `streamlit_app/streamlit_app/pipeline.py`: pipeline inference SAM3, UNet/ASPP, DINOv2 và LoRA.
-- `streamlit_app/streamlit_app/models.py`: kiến trúc các model UNet/ASPP.
-- `streamlit_app/streamlit_app/viz.py`: hàm hiển thị, colormap và overlay kết quả.
-- `streamlit_app/streamlit_app/requirements.txt`: các thư viện Python cần cho app.
-- `weights/`: chứa checkpoint/model weight. Folder này không push lên GitHub vì rất nặng.
+# Main Files and Folders
 
-## 2. Tải Weights
+| File / Folder | Description |
+|---|---|
+| `Dockerfile` | Defines the Docker runtime environment for the application |
+| `.dockerignore` | Excludes checkpoints, cache files, notebooks, and heavy files from Docker build context |
+| `.gitignore` | Excludes `weights/`, checkpoints, and cache files from Git |
+| `streamlit_app/streamlit_app/app.py` | Main Streamlit user interface |
+| `streamlit_app/streamlit_app/pipeline.py` | SAM3 + UNet/ASPP + DINOv2 + LoRA inference pipeline |
+| `streamlit_app/streamlit_app/models.py` | UNet/ASPP model architectures |
+| `streamlit_app/streamlit_app/viz.py` | Visualization utilities, overlays, and VOC colormap |
+| `streamlit_app/streamlit_app/requirements.txt` | Python dependencies |
+| `weights/` | Contains all checkpoints and model weights |
 
-Do `weights/` rất nặng, repo không chứa folder này. Người dùng cần tải weights riêng từ link sau:
+---
+
+# 2. Download Weights
+
+The repository does not include the `weights/` directory because the files are too large for GitHub.
+
+Download the weights from:
 
 ```text
-TODO: dán link tải weights ở đây
+https://drive.google.com/drive/folders/1xPDGTGXI1LbXVc6BKm4re0X-RnsPGxB9?usp=sharing
 ```
 
-Sau khi tải, giải nén hoặc đặt folder `weights/` tại root project:
+After downloading, place the `weights/` directory at the project root:
 
 ```text
 Sam3_voc2012/
@@ -62,44 +73,55 @@ Sam3_voc2012/
     └── sam3_voc_lora_v16_best/
 ```
 
-Tên file cần giữ đúng như trên vì app mặc định đọc checkpoint từ `/weights`.
+The filenames must remain unchanged because the application loads checkpoints from `/weights` by default.
 
-## 3. Build Docker Image
+---
 
-Chạy tại root project:
+# 3. Build Docker Image
+
+Run from the project root:
 
 ```powershell
 cd D:\Sam3_voc2012
+
 docker build -t sam3-voc2012 .
 ```
 
-Nếu muốn build lại sạch hoàn toàn:
+To rebuild from scratch without cache:
 
 ```powershell
 docker build --no-cache -t sam3-voc2012 .
 ```
 
-## 4. Chạy Bằng Docker
+---
 
-### Chạy CPU
+# 4. Run with Docker
+
+## CPU Mode
 
 ```powershell
 docker run --rm -p 8501:8501 -v "${PWD}\weights:/weights" sam3-voc2012
 ```
 
-### Chạy GPU NVIDIA
+---
+
+## NVIDIA GPU Mode
 
 ```powershell
 docker run --rm --gpus all -p 8501:8501 -v "${PWD}\weights:/weights" sam3-voc2012
 ```
 
-Sau đó mở:
+After launching, open:
 
 ```text
 http://localhost:8501
 ```
 
-Trong giao diện Streamlit, đường dẫn checkpoint mặc định nên là:
+---
+
+# Default Checkpoint Paths
+
+Inside the Streamlit interface, the default checkpoint paths should be:
 
 ```text
 /weights/sam3.pt
@@ -109,28 +131,43 @@ Trong giao diện Streamlit, đường dẫn checkpoint mặc định nên là:
 /weights/sam3_voc_lora_v16_best
 ```
 
-## 5. Chạy Bằng Docker Desktop
+---
 
-Nếu chạy bằng nút **Run** trong Docker Desktop, cần thêm cấu hình thủ công:
+# 5. Running via Docker Desktop
 
-- Port:
-  - Host port: `8501`
-  - Container port: `8501`
-- Volume:
-  - Host path: `D:\Sam3_voc2012\weights`
-  - Container path: `/weights`
+If using the **Run** button in Docker Desktop, manually configure:
 
-Nếu không mount volume này, app sẽ báo không tìm thấy `sam3.pt` hoặc các checkpoint `.pth`.
+## Ports
 
-## 6. Kiểm Tra Volume Weights
+| Host | Container |
+|---|---|
+| `8501` | `8501` |
 
-Có thể kiểm tra container có thấy weights hay không bằng lệnh:
+---
+
+## Volumes
+
+| Host Path | Container Path |
+|---|---|
+| `D:\Sam3_voc2012\weights` | `/weights` |
+
+If this volume is not mounted, the application will fail to locate:
+
+- `sam3.pt`
+- `.pth` checkpoints
+- LoRA adapters
+
+---
+
+# 6. Verify Mounted Weights
+
+You can verify that the container detects the weights correctly:
 
 ```powershell
 docker run --rm -v "${PWD}\weights:/weights" sam3-voc2012 ls -lh /weights
 ```
 
-Output cần có các file:
+Expected output:
 
 ```text
 sam3.pt
@@ -140,63 +177,117 @@ unet_aspp_new_v3_best.pth
 sam3_voc_lora_v16_best
 ```
 
-## 7. Lưu Ý GPU
+---
 
-Nếu chọn device `cuda` trong app, container phải được chạy với:
+# 7. GPU Notes
+
+If selecting `cuda` inside the application, the container must be started with:
 
 ```powershell
 --gpus all
 ```
 
-Kiểm tra GPU trên máy host:
+---
+
+## Check GPU on Host Machine
 
 ```powershell
 nvidia-smi
 ```
 
-Kiểm tra Docker có thấy GPU:
+---
+
+## Check GPU Visibility Inside Docker
 
 ```powershell
 docker run --rm --gpus all nvidia/cuda:12.4.1-base-ubuntu22.04 nvidia-smi
 ```
 
-Nếu Docker không thấy GPU, hãy chạy bằng CPU trong sidebar của app hoặc kiểm tra lại NVIDIA driver, Docker Desktop và WSL2 GPU support.
+If Docker cannot detect the GPU:
 
-## 8. Troubleshooting
+- switch to CPU mode inside Streamlit
+- verify NVIDIA drivers
+- verify Docker Desktop GPU support
+- verify WSL2 GPU support
 
-### Không tìm thấy `sam3.pt`
+---
 
-Nguyên nhân thường là chưa mount `weights/` vào `/weights`.
+# 8. Troubleshooting
 
-Lệnh đúng:
+---
+
+## `sam3.pt` Not Found
+
+Usually caused by missing volume mounting.
+
+Correct command:
 
 ```powershell
 docker run --rm -p 8501:8501 -v "${PWD}\weights:/weights" sam3-voc2012
 ```
 
-### Found no NVIDIA driver
+---
 
-Container đang chạy `cuda` nhưng không có GPU được cấp vào container. Dùng lệnh GPU:
+## `Found no NVIDIA driver`
+
+The container is attempting to use CUDA without GPU access.
+
+Run with GPU support:
 
 ```powershell
 docker run --rm --gpus all -p 8501:8501 -v "${PWD}\weights:/weights" sam3-voc2012
 ```
 
-Hoặc chọn `cpu` trong sidebar Streamlit.
+Or switch to `cpu` inside the Streamlit sidebar.
 
-### Lỗi import module khi chạy SAM3
+---
 
-Hãy build lại image để Docker cài dependencies từ `requirements.txt` và SAM3:
+## SAM3 Import Errors
 
-```powershell
-docker build --no-cache -t sam3-voc2012 .
-```
-
-### Lỗi dtype `BFloat16` và `Float`
-
-App đã bọc inference SAM3 bằng CUDA autocast `bfloat16` trong `pipeline.py`. Nếu gặp lại lỗi này, hãy build lại image từ code mới nhất:
+Rebuild the Docker image:
 
 ```powershell
 docker build --no-cache -t sam3-voc2012 .
 ```
 
+This reinstalls dependencies and SAM3 correctly.
+
+---
+
+## `BFloat16` / `Float` dtype Errors
+
+The application already wraps SAM3 inference using CUDA autocast `bfloat16` inside `pipeline.py`.
+
+If the error still occurs, rebuild the image from the latest source:
+
+```powershell
+docker build --no-cache -t sam3-voc2012 .
+```
+
+---
+
+# Notes
+
+- The `weights/` directory is intentionally excluded from GitHub.
+- Docker volume mounting is required.
+- The application supports:
+  - SAM3 baseline inference
+  - UNet/ASPP refinement
+  - DINOv2 refinement
+  - LoRA fine-tuned SAM3
+- Streamlit runs on port `8501`.
+
+---
+
+# Technologies Used
+
+- Streamlit
+- PyTorch
+- SAM3
+- DINOv2
+- UNet
+- ASPP
+- PEFT / LoRA
+- Docker
+- CUDA
+- OpenCV
