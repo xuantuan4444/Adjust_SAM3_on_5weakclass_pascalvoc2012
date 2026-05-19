@@ -1,0 +1,20 @@
+streamlit>=1.30
+torch>=2.1
+torchvision>=0.16
+numpy>=1.26,<2
+Pillow>=10.0
+pandas>=2.0
+einops>=0.7
+ftfy==6.1.1
+huggingface_hub
+iopath>=0.1.10
+peft>=0.10        # cho variant 'finetune' (load LoRA adapter SAM3)
+portalocker
+pycocotools
+regex
+safetensors>=0.4  # PEFT save_pretrained dùng safetensors
+opencv-python-headless>=4.9
+timm>=1.0.17
+tqdm
+typing_extensions
+
