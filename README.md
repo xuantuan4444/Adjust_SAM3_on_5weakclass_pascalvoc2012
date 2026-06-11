@@ -13,9 +13,7 @@ The application is designed to run inside Docker, while the `weights/` directory
 ├── Dockerfile
 ├── README.md
 ├── .dockerignore
-├── streamlit_app/
-│   ├── README.md
-│   ├── *.ipynb
+├── streamlit_app/ 
 │   └── streamlit_app/
 │       ├── app.py
 │       ├── pipeline.py
